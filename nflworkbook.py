@@ -415,3 +415,34 @@ ryoe_py =\
             }
             ).query("n > 50")
 print(ryoe_py.sort_values("ryoe_total", ascending = False))
+rint(ryoe_py.sort_values("ryoe_per", ascending = False))
+#%%
+## Stability analyses, introduction of one year lags for ryoe
+## Only keep columns we want
+cols_keep = \
+    ["season", "rusher_id", "rusher",
+     "ryoe_per", "yards_per_carry"]
+
+ryoe_now_py = \
+    ryoe_py[cols_keep].copy()
+
+ryoe_last_py = \
+    ryoe_py[cols_keep].copy()
+## Reanme columns to indicate lag year
+ryoe_last_py\
+    .rename(columns = {
+        'ryoe_per': 'ryoe_per_last',
+        'yards_per_carry': 'yards_per_carry_last'},
+        inplace = True)
+ryoe_last_py["season"] += 1
+## Inner merge
+ryoe_lag_py =\
+    ryoe_now_py\
+        .merge(ryoe_last_py,
+               how = 'inner',
+               on = ['rusher_id', 'rusher',
+                     'season'])
+## Correlation matrices for ypc and ryoe on lags
+ryoe_lag_py[["yards_per_carry_last", "yards_per_carry"]].corr()
+
+ryoe_lag_py[["ryoe_per_last", "ryoe_per"]].corr()
